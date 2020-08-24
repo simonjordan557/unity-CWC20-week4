@@ -9,12 +9,14 @@ public class PlayerController : MonoBehaviour
     public string verticalInputMethod;
     private float verticalInput;
     private Rigidbody playerRb;
+    public GameObject powerUpIndicator;
     private GameObject focalPoint;
+    private bool hasPowerUp = false;
+    private float powerUpStrength = 25.0f;
     // Start is called before the first frame update
     void Start()
     {
         playerRb = GetComponent<Rigidbody>();
-        verticalInputMethod = "Vertical";
         focalPoint = GameObject.Find("FocalPoint");
     }
 
@@ -24,5 +26,34 @@ public class PlayerController : MonoBehaviour
         verticalInput = Input.GetAxis(verticalInputMethod);
         velocity = focalPoint.transform.forward * verticalInput * speed * Time.deltaTime;
         playerRb.AddForce(velocity);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("PowerUp"))
+        {
+            hasPowerUp = true;
+            powerUpIndicator.SetActive(true);
+            Destroy(other.gameObject);
+            StartCoroutine(PowerUpCountdownRoutine());
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy") && hasPowerUp == true)
+        {
+            Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
+            enemyRb.AddForce((collision.gameObject.transform.position - transform.position).normalized * powerUpStrength, ForceMode.Impulse);
+        }
+    }
+
+    IEnumerator PowerUpCountdownRoutine()
+    {
+        
+        yield return new WaitForSeconds(5);
+        hasPowerUp = false;
+        powerUpIndicator.SetActive(false);
+
     }
 }

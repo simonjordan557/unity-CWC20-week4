@@ -5,6 +5,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     private GameObject player;
+    public SpawnManager spawnManager;
     
     private Rigidbody enemyRb;
     public float speed = 3.0f;
@@ -14,6 +15,7 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         enemyRb = GetComponent<Rigidbody>();
+        spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManager>(); ;
         player = GameObject.Find("Player");
     }
 
@@ -22,6 +24,12 @@ public class Enemy : MonoBehaviour
     {
         velocity = (player.transform.position - transform.position).normalized * speed * Time.deltaTime;
         enemyRb.AddForce(velocity);
+        
+        if (transform.position.y < -10)
+        {
+            spawnManager.enemyCounter--;
+            Destroy(gameObject);
+        }
         
     }
 }
